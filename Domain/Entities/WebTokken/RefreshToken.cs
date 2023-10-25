@@ -9,7 +9,7 @@ namespace Domain.Entities.WebTokken;
 public class RefreshToken : BaseEntity
 {
     public int UserIdFk { get; set; }
-    public User Users { get; set; }
+    public User User { get; set; }
     public string Token { get; set; }
     public DateTime Expires { get; set; }
     public bool IsExpired => DateTime.UtcNow >= Expires;

@@ -8,7 +8,7 @@ namespace Domain.Entities.Person;
 public class UserRol : BaseEntity
 {
     public int UserIdFk { get; set; }
-    public User Users { get; set; }
+    public User User { get; set; }
     public int RolIdFk { get; set; }
-    public Rol Rols { get; set; }
+    public Rol Rol { get; set; }
 }
