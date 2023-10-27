@@ -1,3 +1,6 @@
+using System.Reflection;
+using Api.Extensions;
+using AspNetCoreRateLimit;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Data;
 
@@ -10,13 +13,25 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-/* Agregar Conexion a la Base de datos */
+/* Add AddAPlicationServices */
+builder.Services.AddAplicationServices();
+
+/* Add Cors */
+builder.Services.ConfigureCors();
+
+/* Add Config RAte Limiting */
+builder.Services.ConfigureRatelimiting();
+
+/* Add AutoMApper */
+builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
+
+
+/* Add connection to database */
 builder.Services.AddDbContext<StudentsContext>(options =>
 {
     string connectionStrings = builder.Configuration.GetConnectionString("MysqlConec");
     options.UseMySql(connectionStrings, ServerVersion.AutoDetect(connectionStrings));
 });
-
 
 var app = builder.Build();
 
@@ -26,6 +41,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+/* Use Cors */
+app.UseCors("CorsPolicy");
+
+/* Use RateLimiting */
+app.UseIpRateLimiting();
 
 app.UseHttpsRedirection();
 

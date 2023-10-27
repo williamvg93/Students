@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Api.Helpers;
+using Application.UnitOfWork;
+using AspNetCoreRateLimit;
+using Domain.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -20,9 +23,27 @@ public static class ApplicationServiceExtensions
         .AllowAnyHeader());
     });
 
-    public static void AddAplicationServices(this IServiceCollection services)
+    public static void ConfigureRatelimiting(this IServiceCollection services)
     {
-        /* services.AddScoped<IUnitOfWork, UnitOfWork>(); */
+        services.AddMemoryCache();
+        services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+        services.AddInMemoryRateLimiting();
+        services.Configure<IpRateLimitOptions>(options =>
+        {
+            options.EnableEndpointRateLimiting = true;
+            options.StackBlockedRequests = false;
+            options.HttpStatusCode = 429;
+            options.RealIpHeader = "X-Real-IP";
+            options.GeneralRules = new List<RateLimitRule>
+            {
+                    new RateLimitRule
+                    {
+                        Endpoint = "*",
+                        Period = "10s",
+                        Limit = 2
+                    }
+            };
+        });
     }
 
     public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
@@ -51,4 +72,10 @@ public static class ApplicationServiceExtensions
                 };
             });
     }
+
+    public static void AddAplicationServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+    }
+
 }
